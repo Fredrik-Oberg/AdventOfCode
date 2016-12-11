@@ -16,26 +16,26 @@ let noTimeForTaxicab input =
             match turn with  
                 | 'R' -> 1
                 | 'L' -> -1
-                | _ -> 0
         let newPos = 
             match pos + move with
-            | 0 -> 4
-            | 1 -> 1
-            | 2 -> 2
-            | 3 -> 3
-            | 4 -> 4
-            | 5 -> 1
+            | 0 -> 4 //N -> W
+            | 1 -> 1 //N
+            | 2 -> 2 //E
+            | 3 -> 3 //S
+            | 4 -> 4 //W
+            | 5 -> 1 //W -> N
         newPos
 
-    let updateGrid (newPosition:int, grid:Grid,steps:int) =
-        match newPosition with
-            | 1 -> {x = grid.x + steps; y = grid.y; visitedTwiceLocation = grid.visitedTwiceLocation}
-            | 2 -> {x = grid.x; y = grid.y + steps; visitedTwiceLocation = grid.visitedTwiceLocation}
-            | 3 -> {x = grid.x - steps; y = grid.y; visitedTwiceLocation = grid.visitedTwiceLocation}
-            | 4 -> {x = grid.x; y = grid.y - steps; visitedTwiceLocation = grid.visitedTwiceLocation}
-            | _ -> grid
+    let newGrid (grid:Grid, x:int, y:int) =
+        {x = x; y = y; visitedTwiceLocation = grid.visitedTwiceLocation}
 
-    
+    let updateGrid (newPosition:int, grid:Grid, steps:int) =
+        match newPosition with
+            | 1 -> newGrid(grid, grid.x + steps, grid.y)
+            | 2 -> newGrid(grid, grid.x, grid.y + steps)
+            | 3 -> newGrid(grid, grid.x - steps, grid.y)
+            | 4 -> newGrid(grid, grid.x, grid.y - steps)
+
     let calcTotalSteps (grid:Grid) =
         System.Math.Abs(grid.x) + System.Math.Abs(grid.y)
       
@@ -48,7 +48,7 @@ let noTimeForTaxicab input =
             else visitedSpots.Add(grid)
         visitedSpots
 
-    let rec loopAndCalc listOfInputs position grid visitedSpots =
+    let rec moveToNewPosition listOfInputs position grid visitedSpots =
         match listOfInputs with
         | [] ->
             printfn "visitedSpots %A " visitedSpots
@@ -63,18 +63,16 @@ let noTimeForTaxicab input =
             let newPosition = switchDirection(turn, position)
             let steps = System.Convert.ToInt32(skipFirstChar(hd))
             let newGrid = updateGrid(newPosition, grid, steps)
-          
-
             let newList = newVisistedList(grid, visitedSpots)
             
-            loopAndCalc tl newPosition newGrid newList
+            moveToNewPosition tl newPosition newGrid newList
 
     let inputList = commaSeparated(input)
                     |> Array.toList
 
     let savedGrids = new System.Collections.Generic.List<Grid>()
 
-    let result = loopAndCalc inputList 1 {x = 0; y = 0; visitedTwiceLocation = 0} savedGrids
+    let result = moveToNewPosition inputList 1 {x = 0; y = 0; visitedTwiceLocation = 0} savedGrids
 
     result
 
