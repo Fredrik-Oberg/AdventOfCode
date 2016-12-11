@@ -26,15 +26,20 @@ let noTimeForTaxicab input =
             | 5 -> 1 //W -> N
         newPos
 
-    let newGrid (grid:Grid, x:int, y:int) =
+    let newGrids (grid:Grid, x:int, y:int) =
         {x = x; y = y; visitedTwiceLocation = grid.visitedTwiceLocation}
 
-    let updateGrid (newPosition:int, grid:Grid, steps:int) =
+    let updateGrid (newPosition:int, grid:Grid, steps:int, visitedSpots:System.Collections.Generic.List<Grid>) =
         match newPosition with
-            | 1 -> newGrid(grid, grid.x + steps, grid.y)
-            | 2 -> newGrid(grid, grid.x, grid.y + steps)
-            | 3 -> newGrid(grid, grid.x - steps, grid.y)
-            | 4 -> newGrid(grid, grid.x, grid.y - steps)
+        //Do while reduce steps and save each step in the list,
+            | 1 -> 
+                visitedSpots.Add(newGrids(grid, grid.x + steps, grid.y))
+            | 2 -> 
+                visitedSpots.Add(newGrids(grid, grid.x, grid.y + steps))
+            | 3 -> 
+                visitedSpots.Add(newGrids(grid, grid.x - steps, grid.y))
+            | 4 -> 
+                visitedSpots.Add(newGrids(grid, grid.x, grid.y - steps))
 
     let calcTotalSteps (grid:Grid) =
         System.Math.Abs(grid.x) + System.Math.Abs(grid.y)
