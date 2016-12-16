@@ -1,6 +1,6 @@
-type Grid = {x:int; y:int; visitedTwiceLocation: int}
+type Grid = {x:int; y:int;}
 
-let noTimeForTaxicab input = 
+let noTimeForTaxicab input =
 
     let commaSeparated (x:string) =
         x.Split([|','|])
@@ -12,11 +12,11 @@ let noTimeForTaxicab input =
         x.Trim().Substring(1)
 
     let switchDirection (turn:char,pos:int) =
-        let move = 
-            match turn with  
+        let move =
+            match turn with
                 | 'R' -> 1
                 | 'L' -> -1
-        let newPos = 
+        let newPos =
             match pos + move with
             | 0 -> 4 //N -> W
             | 1 -> 1 //N
@@ -27,57 +27,57 @@ let noTimeForTaxicab input =
         newPos
 
     let newGrids (grid:Grid, x:int, y:int) =
-        {x = x; y = y; visitedTwiceLocation = grid.visitedTwiceLocation}
+        {x = x; y = y}
 
-    let updateGrid (newPosition:int, grid:Grid, steps:int, visitedSpots:System.Collections.Generic.List<Grid>) =
+    let updateGrid (newPosition:int, visitedSpots:System.Collections.Generic.List<Grid>) =
+        let grid = visitedSpots |> Seq.last
         match newPosition with
-        //Do while reduce steps and save each step in the list,
-            | 1 -> 
-                visitedSpots.Add(newGrids(grid, grid.x + steps, grid.y))
-            | 2 -> 
-                visitedSpots.Add(newGrids(grid, grid.x, grid.y + steps))
-            | 3 -> 
-                visitedSpots.Add(newGrids(grid, grid.x - steps, grid.y))
-            | 4 -> 
-                visitedSpots.Add(newGrids(grid, grid.x, grid.y - steps))
+            //Do while reduce steps and save each step in the list,
+                | 1 -> visitedSpots.Add({x = grid.x + 1; y = grid.y})
+                | 2 -> visitedSpots.Add({x = grid.x; y = grid.y + 1})
+                | 3 -> visitedSpots.Add({x = grid.x - 1; y =grid.y})
+                | 4 -> visitedSpots.Add({x = grid.x; y = grid.y - 1})
+
+        visitedSpots
 
     let calcTotalSteps (grid:Grid) =
         System.Math.Abs(grid.x) + System.Math.Abs(grid.y)
-      
-    let newVisistedList (grid:Grid, visitedSpots:System.Collections.Generic.List<Grid>) = 
-        let hasVisited = 
+
+    let newVisistedList (grid:Grid, visitedSpots:System.Collections.Generic.List<Grid>) =
+        let hasVisited =
             visitedSpots |> Seq.exists (fun x -> x = grid)
 
-        if hasVisited 
-            then visitedSpots.Add({x = grid.x; y = grid.y; visitedTwiceLocation = calcTotalSteps(grid)})
+        if hasVisited
+            then visitedSpots.Add({x = grid.x; y = grid.y;})
             else visitedSpots.Add(grid)
         visitedSpots
 
-    let rec moveToNewPosition listOfInputs position grid visitedSpots =
+
+    let rec moveToNewPosition listOfInputs position visitedSpots =
         match listOfInputs with
         | [] ->
             printfn "visitedSpots %A " visitedSpots
-            let firstVisitedTwoTimes = 
-                visitedSpots |> Seq.find (fun x -> x.visitedTwiceLocation > 1)
-            printfn "firstVisitedTwoTimes %A " firstVisitedTwoTimes
-
-            calcTotalSteps(grid)
-
+            visitedSpots
         | hd::tl ->
             let turn = firstChar(hd)
             let newPosition = switchDirection(turn, position)
             let steps = System.Convert.ToInt32(skipFirstChar(hd))
-            let newGrid = updateGrid(newPosition, grid, steps)
-            let newList = newVisistedList(grid, visitedSpots)
-            
-            moveToNewPosition tl newPosition newGrid newList
+            printfn "steps %A " steps
+
+            let updatedVisitedSpots =
+                [1..steps] |> List.map(fun x -> updateGrid(newPosition, visitedSpots))
+
+            printfn "steps %A " steps
+
+            moveToNewPosition tl newPosition updatedVisitedSpots
+
 
     let inputList = commaSeparated(input)
                     |> Array.toList
 
     let savedGrids = new System.Collections.Generic.List<Grid>()
 
-    let result = moveToNewPosition inputList 1 {x = 0; y = 0; visitedTwiceLocation = 0} savedGrids
+    let result = moveToNewPosition inputList 1 savedGrids
 
     result
 
