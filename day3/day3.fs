@@ -16,7 +16,7 @@ let squaresWithThreeSides(input:IEnumerable<string>) =
 
     res
 
-let path = __SOURCE_DIRECTORY__ + "/inputs.txt"
+let path = __SOURCE_DIRECTORY__ + "/input.txt"
 let input = System.IO.File.ReadLines path
 
 let result = squaresWithThreeSides input
